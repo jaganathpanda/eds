@@ -1,0 +1,116 @@
+.aboutussection-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.aboutussection {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+}
+
+/* First Row: About Us */
+.aboutussection > div:first-child {
+    display: flex;
+    align-items: center;
+    background-color: #5dc1e0; /* Light blue background */
+    padding: 30px;
+    color: #fff;
+}
+
+.aboutussection > div:first-child h3 {
+    font-size: 24px;
+    color: #ffffff;
+}
+
+.aboutussection > div:first-child p {
+    font-size: 16px;
+    line-height: 1.5;
+    color: #ffffff;
+}
+
+.aboutussection > div:first-child a {
+    color: #000;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.aboutussection > div:first-child a:hover {
+    color: #333;
+}
+
+/* Image in the first row */
+.aboutussection > div:first-child div:last-child {
+    flex: 1;
+    text-align: right;
+}
+
+.aboutussection img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+}
+
+/* Second Row: Our Approach & Work for Us */
+.aboutussection > div:last-child {
+    display: flex;
+    gap: 20px;
+}
+
+.aboutussection > div:last-child div {
+    flex: 1;
+    padding: 30px;
+    color: #fff;
+}
+
+.aboutussection > div:last-child div:first-child {
+    background-color: #57004e; /* Dark purple background */
+}
+
+.aboutussection > div:last-child div:last-child {
+    background-color: #57004e; /* Dark purple background */
+}
+
+.aboutussection > div:last-child h3 {
+    font-size: 22px;
+    margin-bottom: 10px;
+}
+
+.aboutussection > div:last-child p {
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.aboutussection a {
+    color: #fff;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.aboutussection a:hover {
+    color: #ddd;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .aboutussection > div:first-child,
+    .aboutussection > div:last-child {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .aboutussection > div:first-child div:last-child {
+        text-align: center;
+    }
+
+    .aboutussection img {
+        max-width: 80%;
+        margin-top: 10px;
+    }
+}
