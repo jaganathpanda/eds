@@ -14,4 +14,7 @@
     background-color: #333;
     color: white;
   }
+  .employee-hide{
+    display: none;
+  }
   
