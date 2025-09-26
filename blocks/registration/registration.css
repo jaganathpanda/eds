@@ -1,0 +1,39 @@
+.registration-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+  }
+  
+  .registration-group {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  
+  .registration-group label {
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+  
+  .registration-group input {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+  
+  .registration-error {
+    color: red;
+    font-size: 12px;
+    margin-top: 4px;
+    display: none; /* can be toggled via JS */
+  }
+  
+  .registration-icon {
+    position: absolute;
+    right: 10px;
+    top: 36px;
+    font-size: 14px;
+    color: #555;
+  }
+  
