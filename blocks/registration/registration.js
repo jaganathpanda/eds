@@ -4,18 +4,41 @@ export default function decorate(block) {
     // Collect rows from Google Doc authored block
     const rows = block.querySelectorAll('.registration > div');
   
+    // Function: detect required fields by label
+    function isAlwaysRequired(label) {
+      const alwaysRequired = [
+        'First Name',
+        'Last Name',
+        'Email',
+        'Company Name',
+        'Website',
+        'Brands We Carry/Represent',
+      ];
+      return alwaysRequired.some(req => label.toLowerCase().includes(req.toLowerCase()));
+    }
+  
     // Skip the first row (header row in Google Doc)
     rows.forEach((row, index) => {
       if (index === 0) return;
   
       const parts = row.querySelectorAll('p');
-      if (parts.length >= 4) {
+      if (parts.length >= 3) {
+        const label = parts[0].textContent.trim();
+        const errorMsg = parts[1].textContent.trim();
+        const type = parts[2].textContent.trim().toLowerCase();
+        const options = parts[3] ? parts[3].textContent.trim() : '';
+  
+        // ✅ Auto-detect required + support "true" column
+        const required =
+          isAlwaysRequired(label) ||
+          (parts[4] && parts[4].textContent.trim().toLowerCase() === 'true');
+  
         fields.push({
-          label: parts[0].textContent.trim(),
-          error: parts[1].textContent.trim(),
-          type: parts[2].textContent.trim().toLowerCase(),
-          options: parts[3] ? parts[3].textContent.trim() : '',
-          required: parts[4] ? parts[4].textContent.trim().toLowerCase() === 'true' : false,
+          label,
+          error: errorMsg,
+          type,
+          options,
+          required,
           id: `field-${index}`,
         });
       }
@@ -33,7 +56,7 @@ export default function decorate(block) {
       wrapper.classList.add('form-group');
   
       if (field.type === 'textbox') {
-        // Text input with placeholder as label
+        // Text input
         const input = document.createElement('input');
         input.type = getInputType(field.label);
         input.id = field.id;
@@ -41,7 +64,6 @@ export default function decorate(block) {
         input.placeholder = field.required ? `${field.label} *` : field.label;
   
         if (field.required) {
-          // input.setAttribute('required', true); // Using custom validation instead of HTML5 built-in
           input.classList.add('required-field');
           input.dataset.errorId = `${field.id}-error`;
         }
@@ -51,7 +73,7 @@ export default function decorate(block) {
         if (field.required) {
           const error = document.createElement('div');
           error.classList.add('error-msg');
-          error.id = `${field.id}-error`; // Add ID to link to the input
+          error.id = `${field.id}-error`;
           error.textContent = field.error;
           wrapper.appendChild(error);
         }
@@ -64,10 +86,10 @@ export default function decorate(block) {
   
         const optionsWrapper = document.createElement('div');
         optionsWrapper.classList.add('radio-group');
-        
+  
         if (field.required) {
-            optionsWrapper.classList.add('required-field');
-            optionsWrapper.dataset.errorId = `${field.id}-error`;
+          optionsWrapper.classList.add('required-field');
+          optionsWrapper.dataset.errorId = `${field.id}-error`;
         }
   
         const options = field.options.split(',').map(opt => opt.trim());
@@ -81,8 +103,6 @@ export default function decorate(block) {
           input.id = radioId;
           input.name = field.label.toLowerCase().replace(/\s+/g, '-');
           input.value = opt;
-          
-          // No 'required' attribute here, validation is done on the group
   
           const lbl = document.createElement('label');
           lbl.setAttribute('for', radioId);
@@ -99,7 +119,7 @@ export default function decorate(block) {
         if (field.required) {
           const error = document.createElement('div');
           error.classList.add('error-msg');
-          error.id = `${field.id}-error`; // Add ID to link to the radio group
+          error.id = `${field.id}-error`;
           error.textContent = field.error;
           wrapper.appendChild(error);
         }
@@ -127,56 +147,57 @@ export default function decorate(block) {
     // Handle form submit
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      
+  
       let isValid = true;
       const requiredFields = form.querySelectorAll('.required-field');
-      
+  
       // 1. Reset all error messages
       form.querySelectorAll('.error-msg').forEach(error => {
-          error.style.display = 'none';
+        error.style.display = 'none';
       });
-      
+  
       // 2. Iterate and validate required fields
       requiredFields.forEach(field => {
-          const errorMsg = document.getElementById(field.dataset.errorId);
-          let isFieldValid = true;
-          
-          if (field.tagName === 'INPUT' && (field.type === 'text' || field.type === 'email' || field.type === 'url' || field.type === 'tel' || field.type === 'password')) {
-              // Textbox validation
-              if (field.value.trim() === '') {
-                  isFieldValid = false;
-              }
-          } else if (field.classList.contains('radio-group')) {
-              // Radio button group validation
-              const radioName = field.querySelector('input[type="radio"]').name;
-              const checkedRadio = form.querySelector(`input[name="${radioName}"]:checked`);
-              if (!checkedRadio) {
-                  isFieldValid = false;
-              }
+        const errorMsg = document.getElementById(field.dataset.errorId);
+        let isFieldValid = true;
+  
+        if (
+          field.tagName === 'INPUT' &&
+          (field.type === 'text' ||
+            field.type === 'email' ||
+            field.type === 'url' ||
+            field.type === 'tel' ||
+            field.type === 'password')
+        ) {
+          if (field.value.trim() === '') {
+            isFieldValid = false;
           }
-          
-          if (!isFieldValid) {
-              isValid = false;
-              if (errorMsg) {
-                  errorMsg.style.display = 'block'; // Show the error message
-              }
-              // Add a class to the input/wrapper to style the invalid state
-              field.classList.add('input-error'); 
-          } else {
-              field.classList.remove('input-error');
+        } else if (field.classList.contains('radio-group')) {
+          const radioName = field.querySelector('input[type="radio"]').name;
+          const checkedRadio = form.querySelector(`input[name="${radioName}"]:checked`);
+          if (!checkedRadio) {
+            isFieldValid = false;
           }
+        }
+  
+        if (!isFieldValid) {
+          isValid = false;
+          if (errorMsg) {
+            errorMsg.style.display = 'block';
+          }
+          field.classList.add('input-error');
+        } else {
+          field.classList.remove('input-error');
+        }
       });
-      
+  
       // 3. Submit if valid
       if (isValid) {
-          const formData = new FormData(form);
-          const data = Object.fromEntries(formData.entries());
-    
-          console.log('Form submitted:', data);
-    
-          // Example: show an alert (replace with API call)
-          alert('Form submitted successfully!');
-          // form.submit(); // Uncomment this line if you need a standard form submission
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        console.log('Form submitted:', data);
+  
+        alert('Form submitted successfully!');
       }
     });
   
@@ -194,3 +215,4 @@ export default function decorate(block) {
     if (l.includes('website') || l.includes('url')) return 'url';
     return 'text';
   }
+  
