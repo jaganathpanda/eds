@@ -1,39 +1,116 @@
+/*
+ * Styles for the Registration block (.registration)
+ *
+ * The .block.registration selector targets the outer div created by AEM for the block.
+ * This is where we apply the overall background image and color.
+ */
+ .block.registration {
+    /* 1. Set Background Image and Color Overlay (to match the screenshot) */
+    /* Stack a linear gradient (for a semi-transparent color overlay) over the image. */
+    background:
+        /* Layer 1: Semi-transparent color overlay (adjust the rgba color/opacity as needed) */
+        linear-gradient(rgba(0, 100, 255, 0.2), rgba(0, 100, 255, 0.2)),
+        /* Layer 2: Background Image (Update this URL to your image path in AEM/DAM) */
+        url('https://d1ra4hr810e003.cloudfront.net/visual/accountbackground/8B4930AD-F385-42B6-84E80A99D2538DC4/large-B9E63089-CEB1-451B-A3991CE76CE5626C.jpg');
+
+    /* 2. Background Position and Sizing */
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+
+    /* 3. Layout: Center the form within the background area */
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center;     /* Center vertically */
+    
+    /* 4. Spacing for the block */
+    padding: 60px 20px; /* Padding around the content inside the block */
+    min-height: 400px; /* Ensure the background image has space to display */
+}
+
+/* * Styles for the form itself (.registration-form)
+ * * This treats the form as a "card" floating on the background image.
+ */
 .registration-form {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    width: 100%;
-  }
-  
-  .registration-group {
+    gap: 20px;
+    max-width: 400px;
+    
+    /* Center the form content horizontally within its wrapper (if the wrapper is wider) */
+    margin: 0 auto; 
+    
+    /* Card Styles: White background, padding, and subtle shadow */
+    background-color: #fff; /* White background for the form fields area */
+    padding: 30px; 
+    border-radius: 8px; 
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Deeper shadow for "floating" effect */
+}
+
+/* * Ensure any default content (like a block title) added via the document
+ * is legible against the background if it's placed outside of .registration-form.
+ */
+.block.registration h1,
+.block.registration h2,
+.block.registration p {
+    color: #fff; /* White text for contrast on a dark background */
+}
+
+/* --- Existing Styles (Adjusted for better contrast/visibility) --- */
+
+.form-group {
     display: flex;
     flex-direction: column;
-    position: relative;
-  }
-  
-  .registration-group label {
-    font-weight: bold;
-    margin-bottom: 4px;
-  }
-  
-  .registration-group input {
-    padding: 8px 12px;
+}
+
+.form-group label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #333; /* Darker color for labels on the white form background */
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="url"],
+.form-group input[type="tel"],
+.form-group input[type="password"] {
+    padding: 10px 12px;
     border: 1px solid #ccc;
     border-radius: 6px;
-  }
-  
-  .registration-error {
-    color: red;
+    /* Ensure the input background is white to sit on the form card */
+    background-color: #fff;
+}
+
+.radio-label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.error-msg {
+    color: #fff;
+    background: #c00; /* Use a slightly deeper red for visibility */
     font-size: 12px;
+    padding: 4px 6px;
     margin-top: 4px;
-    display: none; /* can be toggled via JS */
-  }
-  
-  .registration-icon {
-    position: absolute;
-    right: 10px;
-    top: 36px;
-    font-size: 14px;
-    color: #555;
-  }
-  
+    border-radius: 3px;
+    display: none; /* show with validation */
+}
+
+.form-logo {
+    max-width: 120px;
+    margin-top: 8px;
+}
