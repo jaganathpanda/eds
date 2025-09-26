@@ -1,80 +1,65 @@
-/*
- * Styles for the Registration block (.registration)
- *
- * The .block.registration selector targets the outer div created by AEM for the block.
- * This is where we apply the overall background image and color.
- */
+/* --- Block Background --- */
 .block.registration {
-    /* 1. Set Background Image and Color Overlay (to match the screenshot) */
-    /* Stack a linear gradient (for a semi-transparent color overlay) over the image. */
     background:
-        /* Layer 1: Semi-transparent color overlay (adjust the rgba color/opacity as needed) */
         linear-gradient(rgba(0, 100, 255, 0.2), rgba(0, 100, 255, 0.2)),
-        /* Layer 2: Background Image (Update this URL to your image path in AEM/DAM) */
         url('https://d1ra4hr810e003.cloudfront.net/visual/accountbackground/8B4930AD-F385-42B6-84E80A99D2538DC4/large-B9E63089-CEB1-451B-A3991CE76CE5626C.jpg');
-
-    /* 2. Background Position and Sizing */
     background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
-
-    /* 3. Layout: Center the form within the background area */
     display: flex;
     justify-content: center;
-    /* Center horizontally */
     align-items: center;
-    /* Center vertically */
-
-    /* 4. Spacing for the block */
     padding: 60px 20px;
-    /* Padding around the content inside the block */
     min-height: 400px;
-    /* Ensure the background image has space to display */
 }
 
-/* * Styles for the form itself (.registration-form)
- * * This treats the form as a "card" floating on the background image.
- */
+/* --- Form Card --- */
 .registration-form {
     display: flex;
     flex-direction: column;
     gap: 20px;
     max-width: 400px;
-
-    /* Center the form content horizontally within its wrapper (if the wrapper is wider) */
+    width: 280px;
     margin: 0 auto;
-
-    /* Card Styles: White background, padding, and subtle shadow */
     background-color: #fff;
-    /* White background for the form fields area */
     padding: 30px;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    /* Deeper shadow for "floating" effect */
 }
 
-/* * Ensure any default content (like a block title) added via the document
- * is legible against the background if it's placed outside of .registration-form.
- */
-.block.registration h1,
-.block.registration h2,
-.block.registration p {
-    color: #fff;
-    /* White text for contrast on a dark background */
+/* --- Logo, Headings, Intro Text --- */
+.registration-form .form-logo {
+    display: block;
+    margin: 0 auto 16px auto;
+    max-height: 100px;
 }
 
-/* --- Existing Styles (Adjusted for better contrast/visibility) --- */
+.registration-form h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    text-align: left;
+    color: #222;
+    margin: 8px 0;
+}
 
+.registration-form p.intro-text {
+    text-align: left;
+    color: #333;
+    margin-bottom: 20px;
+    line-height: 1.4;
+    font-family: var(--user-brandFontStackBase, Inter, Helvetica, Arial, sans-serif);
+    font-size: 14px;
+}
+
+/* --- Form Fields --- */
 .form-group {
     display: flex;
     flex-direction: column;
 }
 
 .form-group label {
-    font-weight: 600;
     margin-bottom: 6px;
     color: #333;
-    /* Darker color for labels on the white form background */
 }
 
 .form-group input[type="text"],
@@ -85,10 +70,10 @@
     padding: 10px 12px;
     border: 1px solid #ccc;
     border-radius: 6px;
-    /* Ensure the input background is white to sit on the form card */
     background-color: #fff;
 }
 
+/* --- Radio Buttons --- */
 .radio-label {
     font-weight: 600;
     color: #333;
@@ -108,11 +93,11 @@
     gap: 8px;
 }
 
+/* --- Validation --- */
 .input-error {
     border: 1px solid red !important;
     background-color: #ffe6e6 !important;
 }
-
 
 .error-msg {
     color: #fff;
@@ -124,19 +109,17 @@
     display: none;
 }
 
-.form-logo {
-    position: static;
-    width: auto;
-    height: 80px;
-    margin: 0;
-    padding: 0;
-    background-size: contain !important;
-    background-color: #fff !important;
+/* --- Submit Button --- */
+.submit-btn {
+    padding: 10px 16px;
     border: none;
-    border-radius: 0;
-    box-shadow: none;
-    box-sizing: border-box;
-    transform: none;
-    transition: none;
-    z-index: 110;
+    border-radius: 6px;
+    background-color: #0064ff;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.submit-btn:hover {
+    background-color: #004db3;
 }
