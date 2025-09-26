@@ -111,6 +111,18 @@
 }
 
 .form-logo {
-    max-width: 120px;
-    margin-top: 8px;
+    position: static;
+    width: auto;
+    height: 80px;
+    margin: 0;
+    padding: 0;
+    background-size: contain !important;
+    background-color: #fff !important;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    box-sizing: border-box;
+    transform: none;
+    transition: none;
+    z-index: 110;
 }
