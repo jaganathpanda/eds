@@ -80,6 +80,7 @@
     border-radius: 6px;
     background-color: #fff;
     resize: vertical;
+    height: 28px;
 }
 
 /* --- Radio Buttons --- */
