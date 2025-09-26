@@ -73,6 +73,15 @@
     background-color: #fff;
 }
 
+.form-group input,
+.form-group textarea {
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #fff;
+    resize: vertical;
+}
+
 /* --- Radio Buttons --- */
 .radio-label {
     font-weight: 600;

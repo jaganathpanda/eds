@@ -149,7 +149,21 @@ export default function decorate(block) {
             p.textContent = field.label;
             p.classList.add('intro-text'); // add this
             wrapper.appendChild(p);
-          }
+        } else if (field.type === 'textarea') {
+            const textarea = document.createElement('textarea');
+            textarea.id = field.id;
+            textarea.name = field.label.toLowerCase().replace(/\s+/g, '-');
+            textarea.placeholder = field.required ? `${field.label} *` : field.label;
+            textarea.rows = 4;
+
+            if (field.required) {
+                textarea.classList.add('required-field');
+                textarea.dataset.errorId = `${field.id}-error`;
+            }
+
+            wrapper.appendChild(textarea);
+
+        }
 
 
         form.appendChild(wrapper);
