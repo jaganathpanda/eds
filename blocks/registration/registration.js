@@ -11,24 +11,23 @@ export default function decorate(block) {
     rows.forEach((row, index) => {
         if (index === 0) return; // skip header
 
-        const parts = row.querySelectorAll('p');
-        if (parts.length >= 3) {
-            const label = parts[0].textContent.trim();
-            const errorMsg = parts[1].textContent.trim();
-            const type = parts[2].textContent.trim().toLowerCase();
-            const options = parts[3] ? parts[3].textContent.trim() : '';
-
-            const required = isAlwaysRequired(label) || (parts[4] && parts[4].textContent.trim().toLowerCase() === 'true');
-
-            fields.push({
-                label,
-                error: errorMsg,
-                type,
-                options,
-                required,
-                id: `field-${index}`,
-            });
-        }
+        let rowText = row.textContent
+            .split("\n")
+            .map(c => c.trim());
+        // remove leading/trailing empty
+        while (rowText.length && rowText[0] === "") rowText.shift();
+        while (rowText.length && rowText[rowText.length - 1] === "") rowText.pop();
+        // ensure 5 columns always
+        while (rowText.length < 5) rowText.push("");
+        const [label, errorMsg, type, options, requiredRaw] = rowText;
+        fields.push({
+            label,
+            error: errorMsg,
+            type: type.toLowerCase(),
+            options,
+            required: requiredRaw.toLowerCase() === "true",
+            id: `field-${index}`,
+        });
     });
 
     block.innerHTML = '';
@@ -60,7 +59,7 @@ export default function decorate(block) {
                 wrapper.appendChild(error);
             }
 
-        } 
+        }
         // Radio
         else if (field.type === 'radio') {
             const labelDiv = document.createElement('div');
@@ -126,12 +125,12 @@ export default function decorate(block) {
                         }
                     } else if (selected === 'employee') {
                         // Keep visible: First Name, Last Name, Email, logo, headings, submit button, Account Type radio
-                        const keepVisibleLabels = ['first name','last name','email'];
+                        const keepVisibleLabels = ['first name', 'last name', 'email'];
                         if (
-                            keepVisibleLabels.includes(label) || 
-                            fg.querySelector('img') || 
-                            fg.querySelector('button') || 
-                            fg.querySelector('p.intro-text') || 
+                            keepVisibleLabels.includes(label) ||
+                            fg.querySelector('img') ||
+                            fg.querySelector('button') ||
+                            fg.querySelector('p.intro-text') ||
                             hasRadio
                         ) {
                             fg.style.display = '';
@@ -143,7 +142,7 @@ export default function decorate(block) {
                     }
                 });
             });
-        } 
+        }
         // Textarea
         else if (field.type === 'textarea') {
             const textarea = document.createElement('textarea');
@@ -156,7 +155,7 @@ export default function decorate(block) {
                 textarea.dataset.errorId = `${field.id}-error`;
             }
             wrapper.appendChild(textarea);
-        } 
+        }
         // Image
         else if (field.type === 'image') {
             const img = document.createElement('img');
@@ -164,7 +163,7 @@ export default function decorate(block) {
             img.alt = field.label;
             img.classList.add('form-logo');
             wrapper.appendChild(img);
-        } 
+        }
         // Button
         else if (field.type === 'button') {
             const button = document.createElement('button');
@@ -172,13 +171,13 @@ export default function decorate(block) {
             button.classList.add('submit-btn');
             button.textContent = field.label || 'Submit';
             wrapper.appendChild(button);
-        } 
+        }
         // Heading
         else if (field.type === 'heading') {
             const heading = document.createElement(field.options || 'h2');
             heading.textContent = field.label;
             wrapper.appendChild(heading);
-        } 
+        }
         // Text
         else if (field.type === 'text') {
             const p = document.createElement(field.options || 'p');
@@ -208,7 +207,7 @@ export default function decorate(block) {
             const errorMsg = document.getElementById(field.dataset.errorId);
             let valid = true;
 
-            if (field.tagName === 'INPUT' && ['text','email','url','tel','password'].includes(field.type)) {
+            if (field.tagName === 'INPUT' && ['text', 'email', 'url', 'tel', 'password'].includes(field.type)) {
                 if (field.value.trim() === '') valid = false;
             } else if (field.classList.contains('radio-group')) {
                 const radioName = field.querySelector('input[type="radio"]').name;
