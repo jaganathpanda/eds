@@ -3,23 +3,66 @@ export default function decorate(block) {
 
     const rows = block.querySelectorAll('.registration > div');
 
+    // ------------------------
+    // Helpers
+    // ------------------------
+
     function isAlwaysRequired(label) {
-        const alwaysRequired = ['First Name', 'Last Name', 'Email', 'Company Name', 'Website', 'Brands We Carry/Represent'];
+        const alwaysRequired = [
+            'First Name',
+            'Last Name',
+            'Email',
+            'Company Name',
+            'Website',
+            'Brands We Carry/Represent'
+        ];
         return alwaysRequired.some(req => label.toLowerCase() === req.toLowerCase());
     }
 
-    rows.forEach((row, index) => {
-        if (index === 0) return; // skip header
+    function cleanRowText(row) {
+        let rowText = row.textContent.split("\n").map(c => c.trim());
 
-        let rowText = row.textContent
-            .split("\n")
-            .map(c => c.trim());
         // remove leading/trailing empty
         while (rowText.length && rowText[0] === "") rowText.shift();
         while (rowText.length && rowText[rowText.length - 1] === "") rowText.pop();
+
         // ensure 5 columns always
         while (rowText.length < 5) rowText.push("");
-        const [label, errorMsg, type, options, requiredRaw] = rowText;
+        return rowText;
+    }
+
+    function createErrorElement(field) {
+        const error = document.createElement('div');
+        error.classList.add('error-msg');
+        error.id = `${field.id}-error`;
+        error.textContent = field.error;
+        return error;
+    }
+
+    function applyRequiredAttributes(el, field) {
+        if (field.required) {
+            el.classList.add('required-field');
+            el.dataset.errorId = `${field.id}-error`;
+        }
+    }
+
+    function getInputType(label) {
+        const l = label.toLowerCase();
+        if (l.includes('email')) return 'email';
+        if (l.includes('password')) return 'password';
+        if (l.includes('phone')) return 'tel';
+        if (l.includes('website') || l.includes('url')) return 'url';
+        return 'text';
+    }
+
+    // ------------------------
+    // Parse rows into fields[]
+    // ------------------------
+    rows.forEach((row, index) => {
+        if (index === 0) return; // skip header
+
+        const [label, errorMsg, type, options, requiredRaw] = cleanRowText(row);
+
         fields.push({
             label,
             error: errorMsg,
@@ -30,6 +73,9 @@ export default function decorate(block) {
         });
     });
 
+    // ------------------------
+    // Render form
+    // ------------------------
     block.innerHTML = '';
     const form = document.createElement('form');
     form.classList.add('registration-form');
@@ -39,180 +85,186 @@ export default function decorate(block) {
         wrapper.classList.add('form-group');
         wrapper.dataset.fieldLabel = field.label;
 
-        // Textbox
-        if (field.type === 'textbox') {
-            const input = document.createElement('input');
-            input.type = getInputType(field.label);
-            input.id = field.id;
-            input.name = field.label.toLowerCase().replace(/\s+/g, '-');
-            input.placeholder = field.required ? `${field.label} *` : field.label;
-            if (field.required) {
-                input.classList.add('required-field');
-                input.dataset.errorId = `${field.id}-error`;
-            }
-            wrapper.appendChild(input);
-            if (field.required) {
-                const error = document.createElement('div');
-                error.classList.add('error-msg');
-                error.id = `${field.id}-error`;
-                error.textContent = field.error;
-                wrapper.appendChild(error);
-            }
+        let element;
 
-        }
-        // Radio
-        else if (field.type === 'radio') {
-            const labelDiv = document.createElement('div');
-            labelDiv.classList.add('radio-label');
-            labelDiv.textContent = field.label;
+        switch (field.type) {
+            case 'textbox':
+                element = document.createElement('input');
+                element.type = getInputType(field.label);
+                element.placeholder = field.required ? `${field.label} *` : field.label;
+                break;
 
-            const optionsWrapper = document.createElement('div');
-            optionsWrapper.classList.add('radio-group');
-            if (field.required) {
-                optionsWrapper.classList.add('required-field');
-                optionsWrapper.dataset.errorId = `${field.id}-error`;
-            }
+            case 'textarea':
+                element = document.createElement('textarea');
+                element.rows = 4;
+                element.placeholder = field.required ? `${field.label} *` : field.label;
+                break;
 
-            const options = field.options.split(',').map(opt => opt.trim());
-            options.forEach((opt, i) => {
-                const radioId = `${field.id}-${i}`;
-                const radioWrapper = document.createElement('div');
-                radioWrapper.classList.add('radio-option');
+            case 'radio': {
+                const labelDiv = document.createElement('div');
+                labelDiv.classList.add('radio-label');
+                labelDiv.textContent = field.label;
 
-                const input = document.createElement('input');
-                input.type = 'radio';
-                input.id = radioId;
-                input.name = field.label.toLowerCase().replace(/\s+/g, '-');
-                input.value = opt;
+                const optionsWrapper = document.createElement('div');
+                optionsWrapper.classList.add('radio-group');
+                applyRequiredAttributes(optionsWrapper, field);
 
-                // Default selection
-                if (opt.toLowerCase() === 'retailer/partner') input.checked = true;
+                const options = field.options.split(',').map(opt => opt.trim());
+                options.forEach((opt, i) => {
+                    const radioId = `${field.id}-${i}`;
+                    const radioWrapper = document.createElement('div');
+                    radioWrapper.classList.add('radio-option');
 
-                const lbl = document.createElement('label');
-                lbl.setAttribute('for', radioId);
-                lbl.textContent = opt;
+                    const input = document.createElement('input');
+                    input.type = 'radio';
+                    input.id = radioId;
+                    input.name = field.label.toLowerCase().replace(/\s+/g, '-');
+                    input.value = opt;
 
-                radioWrapper.appendChild(input);
-                radioWrapper.appendChild(lbl);
-                optionsWrapper.appendChild(radioWrapper);
-            });
+                    if (opt.toLowerCase() === 'retailer/partner') input.checked = true;
 
-            wrapper.appendChild(labelDiv);
-            wrapper.appendChild(optionsWrapper);
+                    const lbl = document.createElement('label');
+                    lbl.setAttribute('for', radioId);
+                    lbl.textContent = opt;
 
-            if (field.required) {
-                const error = document.createElement('div');
-                error.classList.add('error-msg');
-                error.id = `${field.id}-error`;
-                error.textContent = field.error;
-                wrapper.appendChild(error);
-            }
-
-            // Conditional logic for Account Type
-            optionsWrapper.addEventListener('change', () => {
-                const selected = form.querySelector(`input[name="${optionsWrapper.querySelector('input').name}"]:checked`).value.toLowerCase();
-
-                form.querySelectorAll('.form-group').forEach(fg => {
-                    const label = fg.dataset.fieldLabel ? fg.dataset.fieldLabel.toLowerCase() : '';
-                    const hasRadio = fg.querySelector('input[type="radio"]');
-
-                    if (selected === 'agency/vendor partner') {
-                        // Hide only Sales Representative Name
-                        if (label.includes('sales representative name')) {
-                            fg.style.display = 'none';
-                        } else {
-                            fg.style.display = '';
-                        }
-                    } else if (selected === 'employee') {
-                        // Keep visible: First Name, Last Name, Email, logo, headings, submit button, Account Type radio
-                        const keepVisibleLabels = ['first name', 'last name', 'email'];
-                        if (
-                            keepVisibleLabels.includes(label) ||
-                            fg.querySelector('img') ||
-                            fg.querySelector('button') ||
-                            fg.querySelector('p.intro-text') ||
-                            hasRadio
-                        ) {
-                            fg.style.display = '';
-                        } else {
-                            fg.style.display = 'none';
-                        }
-                    } else { // Retailer/Partner
-                        fg.style.display = '';
-                    }
+                    radioWrapper.appendChild(input);
+                    radioWrapper.appendChild(lbl);
+                    optionsWrapper.appendChild(radioWrapper);
                 });
-            });
-        }
-        // Textarea
-        else if (field.type === 'textarea') {
-            const textarea = document.createElement('textarea');
-            textarea.id = field.id;
-            textarea.name = field.label.toLowerCase().replace(/\s+/g, '-');
-            textarea.placeholder = field.required ? `${field.label} *` : field.label;
-            textarea.rows = 4;
-            if (field.required) {
-                textarea.classList.add('required-field');
-                textarea.dataset.errorId = `${field.id}-error`;
+
+                wrapper.appendChild(labelDiv);
+                wrapper.appendChild(optionsWrapper);
+
+                if (field.required) wrapper.appendChild(createErrorElement(field));
+                form.appendChild(wrapper);
+
+                // 🔹 Restore conditional field visibility logic
+                optionsWrapper.addEventListener('change', () => {
+                    const selected = form.querySelector(
+                        `input[name="${optionsWrapper.querySelector('input').name}"]:checked`
+                    ).value.toLowerCase();
+
+                    form.querySelectorAll('.form-group').forEach(fg => {
+                        const label = fg.dataset.fieldLabel ? fg.dataset.fieldLabel.toLowerCase() : '';
+                        const hasRadio = fg.querySelector('input[type="radio"]');
+
+                        if (selected === 'agency/vendor partner') {
+                            if (label.includes('sales representative name')) {
+                                fg.style.display = 'none';
+                            } else {
+                                fg.style.display = '';
+                            }
+                        } else if (selected === 'employee') {
+                            const keepVisibleLabels = ['first name', 'last name', 'email'];
+                            if (
+                                keepVisibleLabels.includes(label) ||
+                                fg.querySelector('img') ||
+                                fg.querySelector('button') ||
+                                fg.querySelector('p.intro-text') ||
+                                hasRadio
+                            ) {
+                                fg.style.display = '';
+                            } else {
+                                fg.style.display = 'none';
+                            }
+                        } else {
+                            fg.style.display = '';
+                        }
+                    });
+                });
+
+                return; // ✅ don't forget this!
             }
-            wrapper.appendChild(textarea);
+
+            case 'image':
+                element = document.createElement('img');
+                element.src = field.options;
+                element.alt = field.label;
+                element.classList.add('form-logo');
+                wrapper.appendChild(element);
+                form.appendChild(wrapper);
+                return;
+
+            case 'button':
+                element = document.createElement('button');
+                element.type = 'submit';
+                element.classList.add('submit-btn');
+                element.textContent = field.label || 'Submit';
+                wrapper.appendChild(element);
+                form.appendChild(wrapper);
+                return;
+
+            case 'heading':
+                element = document.createElement(field.options || 'h2');
+                element.textContent = field.label;
+                wrapper.appendChild(element);
+                form.appendChild(wrapper);
+                return;
+
+            case 'text':
+                element = document.createElement(field.options || 'p');
+                element.textContent = field.label;
+                element.classList.add('intro-text');
+                wrapper.appendChild(element);
+                form.appendChild(wrapper);
+                return;
         }
-        // Image
-        else if (field.type === 'image') {
-            const img = document.createElement('img');
-            img.src = field.options;
-            img.alt = field.label;
-            img.classList.add('form-logo');
-            wrapper.appendChild(img);
-        }
-        // Button
-        else if (field.type === 'button') {
-            const button = document.createElement('button');
-            button.type = 'submit';
-            button.classList.add('submit-btn');
-            button.textContent = field.label || 'Submit';
-            wrapper.appendChild(button);
-        }
-        // Heading
-        else if (field.type === 'heading') {
-            const heading = document.createElement(field.options || 'h2');
-            heading.textContent = field.label;
-            wrapper.appendChild(heading);
-        }
-        // Text
-        else if (field.type === 'text') {
-            const p = document.createElement(field.options || 'p');
-            p.textContent = field.label;
-            p.classList.add('intro-text');
-            wrapper.appendChild(p);
+
+        // Shared for textbox + textarea
+        if (element) {
+            element.id = field.id;
+            element.name = field.label.toLowerCase().replace(/\s+/g, '-');
+            applyRequiredAttributes(element, field);
+            wrapper.appendChild(element);
+
+            if (field.required) wrapper.appendChild(createErrorElement(field));
         }
 
         form.appendChild(wrapper);
     });
 
-    // Trigger default radio selection logic
+    // Trigger default radio logic
     const defaultRadio = form.querySelector('input[type="radio"]:checked');
     if (defaultRadio) defaultRadio.dispatchEvent(new Event('change'));
 
-    // Submit handler with validation only on visible required fields
+    // ------------------------
+    // Validation
+    // ------------------------
+    const validators = {
+        INPUT: (field) => {
+            if (['text', 'email', 'url', 'tel', 'password'].includes(field.type)) {
+                return field.value.trim() !== '';
+            }
+            return true;
+        },
+        TEXTAREA: (field) => field.value.trim() !== '',
+        RADIO: (field) => {
+            const radioName = field.querySelector('input[type="radio"]').name;
+            const checkedRadio = form.querySelector(`input[name="${radioName}"]:checked`);
+            return !!checkedRadio;
+        }
+    };
+
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         let isValid = true;
-        const requiredFields = form.querySelectorAll('.required-field');
 
+        // Hide all errors before validation
         form.querySelectorAll('.error-msg').forEach(error => error.style.display = 'none');
 
+        const requiredFields = form.querySelectorAll('.required-field');
         requiredFields.forEach(field => {
-            if (field.offsetParent === null) return; // skip hidden fields
+            if (field.offsetParent === null) return; // skip hidden
 
             const errorMsg = document.getElementById(field.dataset.errorId);
             let valid = true;
 
-            if (field.tagName === 'INPUT' && ['text', 'email', 'url', 'tel', 'password'].includes(field.type)) {
-                if (field.value.trim() === '') valid = false;
+            if (field.tagName === 'INPUT') {
+                valid = validators.INPUT(field);
+            } else if (field.tagName === 'TEXTAREA') {
+                valid = validators.TEXTAREA(field);
             } else if (field.classList.contains('radio-group')) {
-                const radioName = field.querySelector('input[type="radio"]').name;
-                const checkedRadio = form.querySelector(`input[name="${radioName}"]:checked`);
-                if (!checkedRadio) valid = false;
+                valid = validators.RADIO(field);
             }
 
             if (!valid) {
@@ -233,13 +285,4 @@ export default function decorate(block) {
     });
 
     block.appendChild(form);
-}
-
-function getInputType(label) {
-    const l = label.toLowerCase();
-    if (l.includes('email')) return 'email';
-    if (l.includes('password')) return 'password';
-    if (l.includes('phone')) return 'tel';
-    if (l.includes('website') || l.includes('url')) return 'url';
-    return 'text';
 }
